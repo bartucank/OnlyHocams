@@ -167,8 +167,10 @@ public class OHServicesImpl implements OHServices {
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User jwtUser = (User) auth.getPrincipal();
-        postRepository.insertPost(request.getContent(), LocalDateTime.now(),jwtUser.getId(),request.getCategory());
-
+        Long postId = postRepository.insertPost(request.getContent(), LocalDateTime.now(),jwtUser.getId(),request.getCategory());
+        if(Objects.nonNull(request.getDocumentIds())){
+            documentRepository.linkDocumentToPost(postId,request.getDocumentIds());
+        }
         return  StatusDTO.builder().statusCode("S").msg("Success").build();
     }
 

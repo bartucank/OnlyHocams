@@ -17,8 +17,8 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO post (content,publish_date,category_id,user_id) VALUES (:content, :publishDate, :categoryId,:userId )", nativeQuery = true)
-    void insertPost(@Param("content")String content,
+    @Query(value = "INSERT INTO post (content,publish_date,category_id,user_id) VALUES (:content, :publishDate, :categoryId,:userId ) RETURNING id", nativeQuery = true)
+    Long insertPost(@Param("content")String content,
                     @Param("publishDate")LocalDateTime publishDate,
                     @Param("userId")Long userId,
                     @Param("categoryId")Long categoryId);

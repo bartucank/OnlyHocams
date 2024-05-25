@@ -19,4 +19,25 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
     @Query(value = "DELETE FROM document where post_id in :id ", nativeQuery = true)
     void bulkDeleteByPostIds(@Param("id")List<Long> id);
 
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE document set post_id = :post where id in :ids ", nativeQuery = true)
+    void linkDocumentToPost(@Param("post")Long post,
+                            @Param("ids")List<Long> ids);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE document set note_id = :note where id=:id ", nativeQuery = true)
+    void linkDocumentToNote(@Param("note")Long note,
+                            @Param("ids")Long id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO document (file_name, file_type, data) VALUES (:filename, :filetype, :data )", nativeQuery = true)
+    void insertDocument(@Param("filename")String filename,
+                        @Param("filetype")String filetype,
+                        @Param("data")byte[] data
+                        );
+
+
 }
