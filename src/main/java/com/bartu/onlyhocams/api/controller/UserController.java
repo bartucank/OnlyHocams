@@ -1,0 +1,59 @@
+package com.bartu.onlyhocams.api.controller;
+
+
+
+import com.bartu.onlyhocams.api.request.PostRequest;
+import com.bartu.onlyhocams.api.request.UserRequest;
+import com.bartu.onlyhocams.api.response.JwtResponse;
+import com.bartu.onlyhocams.api.response.StatusDTO;
+import com.bartu.onlyhocams.api.service.ApiResponse;
+import com.bartu.onlyhocams.api.service.ResponseService;
+import com.bartu.onlyhocams.service.OHServices;
+import org.springframework.data.repository.query.Param;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(value ="/api/user", produces = "application/json;charset=UTF-8")
+public class UserController {
+
+    private OHServices service;
+    private ResponseService responseService;
+
+    public UserController(OHServices service, ResponseService responseService) {
+        this.service = service;
+        this.responseService = responseService;
+    }
+
+    @PostMapping("/post")
+    public ResponseEntity<ApiResponse<StatusDTO>> sharePost(@RequestBody PostRequest request){
+        return responseService.createResponse(service.sharePost(request));
+    }
+
+    @DeleteMapping("/post")
+    public ResponseEntity<ApiResponse<StatusDTO>> deletePost(@RequestParam("id")Long id){
+        return responseService.createResponse(service.deletePost(id));
+    }
+
+    @PostMapping("/post/like")
+    public ResponseEntity<ApiResponse<StatusDTO>> likePost(@RequestParam("id")Long id){
+        return responseService.createResponse(service.likePost(id));
+    }
+
+    @PostMapping("/post/dislike")
+    public ResponseEntity<ApiResponse<StatusDTO>> dislikePost(@RequestParam("id")Long id){
+        return responseService.createResponse(service.dislikePost(id));
+    }
+
+    @PostMapping("/post/comment")
+    public ResponseEntity<ApiResponse<StatusDTO>> addComment(@RequestParam("id")Long id, @RequestParam("comment")String comment){
+        return responseService.createResponse(service.addComment(id,comment));
+    }
+
+    @DeleteMapping("/post/comment")
+    public ResponseEntity<ApiResponse<StatusDTO>> deleteComment(@RequestParam("id")Long id){
+        return responseService.createResponse(service.deleteComment(id));
+    }
+
+
+}
