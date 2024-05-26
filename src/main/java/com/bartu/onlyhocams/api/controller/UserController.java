@@ -8,11 +8,17 @@ import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
 import com.bartu.onlyhocams.api.service.ApiResponse;
 import com.bartu.onlyhocams.api.service.ResponseService;
+import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
 import com.bartu.onlyhocams.service.OHServices;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping(value ="/api/user", produces = "application/json;charset=UTF-8")
@@ -61,5 +67,14 @@ public class UserController {
         return responseService.createResponse(service.getUserDetails(id));
     }
 
+    @GetMapping("/post")
+    public ResponseEntity<ApiResponse<List<PostDTO>>> getPosts(@RequestParam("limit")int limit, @RequestParam("offset")int offset,
+                                                               @RequestParam(value = "categoryId",required = true)Long categoryId){
+        return responseService.createResponse(service.getPostsByCategoryId(limit,offset,categoryId));
+    }
 
+    @PostMapping(value="/document",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<StatusDTO>> uploadDocument(@RequestParam("document") MultipartFile file) throws IOException {
+        return responseService.createResponse(service.uploadDocument(file));
+    }
 }

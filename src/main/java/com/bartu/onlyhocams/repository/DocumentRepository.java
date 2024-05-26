@@ -29,15 +29,17 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
     @Transactional
     @Query(value = "UPDATE document set note_id = :note where id=:id ", nativeQuery = true)
     void linkDocumentToNote(@Param("note")Long note,
-                            @Param("ids")Long id);
+                            @Param("id")Long id);
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO document (file_name, file_type, data) VALUES (:filename, :filetype, :data )", nativeQuery = true)
-    void insertDocument(@Param("filename")String filename,
+    @Query(value = "INSERT INTO document (file_name, file_type, data) VALUES (:filename, :filetype, :data ) RETURNING id", nativeQuery = true)
+    int insertDocument(@Param("filename")String filename,
                         @Param("filetype")String filetype,
                         @Param("data")byte[] data
                         );
 
 
+    @Query("select d from Document d where d.post.id=:id")
+    List<Document> getDocumentsByPostId(@Param("id") Long id);
 }

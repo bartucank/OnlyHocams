@@ -13,7 +13,10 @@ public enum ExceptionCode {
     CATEGORY_NULL("Category not found."),
     POST_NOT_FOUND("Post not found."),
     COMMENT_NOT_FOUND("Comment not found."),
-    USER_NOT_FOUND("User not found.");
+    USER_NOT_FOUND("User not found."),
+    FILE_UPLOAD_FAILED("File upload failed."),
+
+    ;
     private final String description;
 
     ExceptionCode(String description) {

@@ -1,5 +1,6 @@
 package com.bartu.onlyhocams.repository;
 
+import com.bartu.onlyhocams.dto.LikeLogDTO;
 import com.bartu.onlyhocams.entity.Document;
 import com.bartu.onlyhocams.entity.LikeLog;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,4 +40,6 @@ public interface LikeLogRepository extends JpaRepository<LikeLog,Long> {
                          @Param("post")Long post,
                          @Param("content")String content);
 
+    @Query("select l from LikeLog l where l.post.id=:id")
+    List<LikeLog> getLikes(@Param("id") Long id);
 }

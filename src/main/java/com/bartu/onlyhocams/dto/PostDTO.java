@@ -14,6 +14,8 @@ public class PostDTO {
     private String formattedDate;
     private UserDTO user;
     private Long categoryId;
-    private Long categoryName;
-    private List<Long> documentIds;
+    private String categoryName;
+    private List<DocumentDTO> documents;
+    private List<CommentDTO> comments;
+    private List<LikeLogDTO> actions;
 }

@@ -1,5 +1,6 @@
 package com.bartu.onlyhocams.entity;
 
+import com.bartu.onlyhocams.dto.UserDTO;
 import com.bartu.onlyhocams.entity.enums.Role;
 import lombok.Data;
 
@@ -31,4 +32,14 @@ public class User {
 
     private BigDecimal credit;
 
+    public UserDTO toDTO(){
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(this.getId());
+        userDTO.setEmail(this.getEmail());
+        userDTO.setName(this.getName());
+        userDTO.setUsername(this.getUsername());
+        userDTO.setRole(this.getRole());
+        userDTO.setRoleStr(this.getRole().getDescription());
+        return userDTO;
+    }
 }

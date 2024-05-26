@@ -5,11 +5,9 @@ import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
+import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
-import com.bartu.onlyhocams.entity.Category;
-import com.bartu.onlyhocams.entity.LikeLog;
-import com.bartu.onlyhocams.entity.Post;
-import com.bartu.onlyhocams.entity.User;
+import com.bartu.onlyhocams.entity.*;
 import com.bartu.onlyhocams.entity.enums.Role;
 import com.bartu.onlyhocams.entity.enums.Type;
 import com.bartu.onlyhocams.exception.ExceptionCode;
@@ -17,6 +15,7 @@ import com.bartu.onlyhocams.exception.OhException;
 import com.bartu.onlyhocams.repository.*;
 import com.bartu.onlyhocams.security.JwtProvider;
 import com.bartu.onlyhocams.security.JwtUserDetails;
+import com.bartu.onlyhocams.service.DocumentUtil;
 import com.bartu.onlyhocams.service.OHServices;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,10 +23,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -168,9 +170,15 @@ public class OHServicesImpl implements OHServices {
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User jwtUser = (User) auth.getPrincipal();
-        Long postId = postRepository.insertPost(request.getContent(), LocalDateTime.now(),jwtUser.getId(),request.getCategory());
+//        Long postId = postRepository.insertPost(request.getContent(), LocalDateTime.now(),jwtUser.getId(),request.getCategory());
+        Post post = new Post();
+        post.setContent(request.getContent());
+        post.setPublishDate(LocalDateTime.now());
+        post.setUser(jwtUser);
+        post.setCategory(categoryRepository.getById(request.getCategory()));
+        post = postRepository.save(post);
         if(Objects.nonNull(request.getDocumentIds())){
-            documentRepository.linkDocumentToPost(postId,request.getDocumentIds());
+            documentRepository.linkDocumentToPost(post.getId(),request.getDocumentIds());
         }
         return  StatusDTO.builder().statusCode("S").msg("Success").build();
     }
@@ -273,19 +281,50 @@ public class OHServicesImpl implements OHServices {
 
     @Override
     public UserDTO getUserDetails(Long id) {
-        UserDTO userDTO = new UserDTO();
         User user = userRepository.getById(id);
         if(Objects.isNull(user)){
             throw new OhException(ExceptionCode.USER_NOT_FOUND);
         }
-        userDTO.setId(user.getId());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setName(user.getName());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setRole(user.getRole());
-        userDTO.setRoleStr(user.getRole().getDescription());
-        return userDTO;
+        return user.toDTO();
     }
+
+    @Override
+    public StatusDTO uploadDocument(MultipartFile file) throws IOException {
+        if(Objects.isNull(file)){
+            throw new OhException(ExceptionCode.INVALID_REQUEST);
+        }
+        Document document = new Document();
+        document.setFileName(file.getOriginalFilename());
+        document.setFileType(file.getContentType());
+        document.setData(DocumentUtil.compressImage(file.getBytes()));
+        document = documentRepository.save(document);
+return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(document.getId()).build();
+    }
+
+    @Override
+    public List<PostDTO> getPostsByCategoryId(int lim, int off,Long categoryId){
+        List<Post> posts =  postRepository.getPosts(lim,off,categoryId);
+        List<PostDTO> postDTOS = new ArrayList<>();
+        for (Post post : posts) {
+            PostDTO postDTO = post.toDTO();
+            List<LikeLog> actions = likeLogRepository.getLikes(post.getId());
+            for (LikeLog action : actions) {
+                if(Objects.isNull(action.getType())){
+                    postDTO.getComments().add(action.toCommentDTO());
+                }else{
+                    postDTO.getActions().add(action.toActionDTO());
+                }
+            }
+            List<Document> documents = documentRepository.getDocumentsByPostId(post.getId());
+            for (Document document : documents) {
+                postDTO.getDocuments().add(document.toDTO());
+            }
+            postDTOS.add(postDTO);
+        }
+
+        return postDTOS;
+    }
+
 
 
 }

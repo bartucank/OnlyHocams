@@ -17,7 +17,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO post (content,publish_date,category_id,user_id) VALUES (:content, :publishDate, :categoryId,:userId ) RETURNING id", nativeQuery = true)
+    @Query(value = "INSERT INTO post (content,publish_date,category_id,user_id) VALUES (:content, :publishDate, :categoryId,:userId ) RETURNING id ", nativeQuery = true)
     Long insertPost(@Param("content")String content,
                     @Param("publishDate")LocalDateTime publishDate,
                     @Param("userId")Long userId,
@@ -38,4 +38,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     @Query("select p.id from Post p where p.category.id=:id ")
     List<Long> getByCategoryId(@Param("id")Long id);
+
+    @Query(value = "select * from post p where  p.category_id=:categoryId order by publish_date desc limit :lim offset :off", nativeQuery = true)
+    List<Post> getPosts(@Param("lim") int lim, @Param("off") int off, @Param("categoryId") Long categoryId);
 }

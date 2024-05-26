@@ -1,6 +1,8 @@
 package com.bartu.onlyhocams.entity;
 
+import com.bartu.onlyhocams.dto.DocumentDTO;
 import com.bartu.onlyhocams.entity.enums.Status;
+import com.bartu.onlyhocams.service.DocumentUtil;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -35,4 +37,13 @@ public class Document {
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "FK_DOCUMENT_NOTE"))
     private Note note;
+
+    public DocumentDTO toDTO(){
+        DocumentDTO documentDTO = new DocumentDTO();
+        documentDTO.setId(this.id);
+        documentDTO.setFileName(this.fileName);
+        documentDTO.setFileType(this.fileType);
+        documentDTO.setData(DocumentUtil.decompressImage(this.data));
+        return documentDTO;
+    }
 }
