@@ -8,6 +8,7 @@ import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
 import com.bartu.onlyhocams.api.service.ApiResponse;
 import com.bartu.onlyhocams.api.service.ResponseService;
+import com.bartu.onlyhocams.dto.UserDTO;
 import com.bartu.onlyhocams.service.OHServices;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +54,11 @@ public class UserController {
     @DeleteMapping("/post/comment")
     public ResponseEntity<ApiResponse<StatusDTO>> deleteComment(@RequestParam("id")Long id){
         return responseService.createResponse(service.deleteComment(id));
+    }
+
+    @GetMapping("/getUserDetails")
+    public ResponseEntity<ApiResponse<UserDTO>> getUserDetails(@RequestParam("id")Long id){
+        return responseService.createResponse(service.getUserDetails(id));
     }
 
 

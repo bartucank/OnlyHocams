@@ -5,6 +5,7 @@ import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
+import com.bartu.onlyhocams.dto.UserDTO;
 import com.bartu.onlyhocams.entity.Category;
 import com.bartu.onlyhocams.entity.LikeLog;
 import com.bartu.onlyhocams.entity.Post;
@@ -268,6 +269,22 @@ public class OHServicesImpl implements OHServices {
         }
         likeLogRepository.deleteById(id);
         return  StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
+
+    @Override
+    public UserDTO getUserDetails(Long id) {
+        UserDTO userDTO = new UserDTO();
+        User user = userRepository.getById(id);
+        if(Objects.isNull(user)){
+            throw new OhException(ExceptionCode.USER_NOT_FOUND);
+        }
+        userDTO.setId(user.getId());
+        userDTO.setEmail(user.getEmail());
+        userDTO.setName(user.getName());
+        userDTO.setUsername(user.getUsername());
+        userDTO.setRole(user.getRole());
+        userDTO.setRoleStr(user.getRole().getDescription());
+        return userDTO;
     }
 
 

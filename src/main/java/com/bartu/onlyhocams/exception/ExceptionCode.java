@@ -9,7 +9,11 @@ public enum ExceptionCode {
     PASS_CANNOT_BE_NULL("Password cannot be empty."),
     USERNAME_CANNOT_BE_NULL("Username cannot be empty."),
     CONTENT_CANNOT_BE_EMPTY("Please write something :)"),
-    USER_UNAUTHORIZED("Unauthorized user."), CATEGORY_NULL("Category not found."), POST_NOT_FOUND("Post not found."), COMMENT_NOT_FOUND("Comment not found.");
+    USER_UNAUTHORIZED("Unauthorized user."),
+    CATEGORY_NULL("Category not found."),
+    POST_NOT_FOUND("Post not found."),
+    COMMENT_NOT_FOUND("Comment not found."),
+    USER_NOT_FOUND("User not found.");
     private final String description;
 
     ExceptionCode(String description) {
