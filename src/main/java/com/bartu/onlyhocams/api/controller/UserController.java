@@ -9,6 +9,7 @@ import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
 import com.bartu.onlyhocams.api.service.ApiResponse;
 import com.bartu.onlyhocams.api.service.ResponseService;
+import com.bartu.onlyhocams.dto.CategoryDTO;
 import com.bartu.onlyhocams.dto.NoteDTO;
 import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
@@ -66,8 +67,8 @@ public class UserController {
     }
 
     @GetMapping("/getUserDetails")
-    public ResponseEntity<ApiResponse<UserDTO>> getUserDetails(@RequestParam("id")Long id){
-        return responseService.createResponse(service.getUserDetails(id));
+    public ResponseEntity<ApiResponse<UserDTO>> getUserDetails(){
+        return responseService.createResponse(service.getUserDetails());
     }
 
     @GetMapping("/post")
@@ -101,4 +102,10 @@ public class UserController {
         return responseService.createResponse(service.reviewNote(id,content,type));
     }
 
+
+
+    @GetMapping("/category")
+    public ResponseEntity<ApiResponse<List<CategoryDTO>>> getCategories(){
+        return responseService.createResponse(service.getCategories());
+    }
 }

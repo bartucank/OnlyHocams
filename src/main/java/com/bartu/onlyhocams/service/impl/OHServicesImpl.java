@@ -6,6 +6,7 @@ import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
+import com.bartu.onlyhocams.dto.CategoryDTO;
 import com.bartu.onlyhocams.dto.NoteDTO;
 import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
@@ -34,6 +35,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -282,7 +284,10 @@ public class OHServicesImpl implements OHServices {
     }
 
     @Override
-    public UserDTO getUserDetails(Long id) {
+    public UserDTO getUserDetails() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        Long id = jwtUser.getId();
         User user = userRepository.getById(id);
         if(Objects.isNull(user)){
             throw new OhException(ExceptionCode.USER_NOT_FOUND);
@@ -325,6 +330,12 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         }
 
         return postDTOS;
+    }
+
+    @Override
+    public List<CategoryDTO> getCategories(){
+        List<Category> categories = categoryRepository.findAll();
+        return categories.stream().map(Category::toDTO).collect(Collectors.toList());
     }
 
     @Override

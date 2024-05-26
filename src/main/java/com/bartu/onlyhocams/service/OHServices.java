@@ -6,6 +6,7 @@ import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
+import com.bartu.onlyhocams.dto.CategoryDTO;
 import com.bartu.onlyhocams.dto.NoteDTO;
 import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
@@ -38,7 +39,7 @@ public interface OHServices {
 
     StatusDTO deleteComment(Long id);
 
-    UserDTO getUserDetails(Long id);
+    UserDTO getUserDetails();
 
     StatusDTO uploadDocument(MultipartFile file) throws IOException;
 
@@ -52,4 +53,6 @@ public interface OHServices {
     List<NoteDTO> getNotes(int limit, int offset);
 
     StatusDTO reviewNote(Long id, String review, Type type);
+
+    List<CategoryDTO> getCategories();
 }
