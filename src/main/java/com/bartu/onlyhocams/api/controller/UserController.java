@@ -2,14 +2,17 @@ package com.bartu.onlyhocams.api.controller;
 
 
 
+import com.bartu.onlyhocams.api.request.NoteRequest;
 import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
 import com.bartu.onlyhocams.api.service.ApiResponse;
 import com.bartu.onlyhocams.api.service.ResponseService;
+import com.bartu.onlyhocams.dto.NoteDTO;
 import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
+import com.bartu.onlyhocams.entity.enums.Type;
 import com.bartu.onlyhocams.service.OHServices;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
@@ -77,4 +80,25 @@ public class UserController {
     public ResponseEntity<ApiResponse<StatusDTO>> uploadDocument(@RequestParam("document") MultipartFile file) throws IOException {
         return responseService.createResponse(service.uploadDocument(file));
     }
+
+    @PostMapping("/note")
+    public ResponseEntity<ApiResponse<StatusDTO>> shareNote(@RequestBody NoteRequest request){
+        return responseService.createResponse(service.shareNote(request));
+    }
+
+    @DeleteMapping("/note")
+    public ResponseEntity<ApiResponse<StatusDTO>> deleteNote(@RequestParam("id")Long id){
+        return responseService.createResponse(service.deleteNote(id));
+    }
+
+    @GetMapping("/note")
+    public ResponseEntity<ApiResponse<List<NoteDTO>>> getNotes(@RequestParam("limit")int limit, @RequestParam("offset")int offset) {
+        return responseService.createResponse(service.getNotes(limit,offset));
+    }
+
+    @PostMapping("/note/review")
+    public ResponseEntity<ApiResponse<StatusDTO>> reviewNote(@RequestParam("id")Long id, @RequestParam("content")String content, @RequestParam("type")Type type){
+        return responseService.createResponse(service.reviewNote(id,content,type));
+    }
+
 }

@@ -15,8 +15,10 @@ public enum ExceptionCode {
     COMMENT_NOT_FOUND("Comment not found."),
     USER_NOT_FOUND("User not found."),
     FILE_UPLOAD_FAILED("File upload failed."),
-
-    ;
+    TITLE_CANNOT_BE_EMPTY(""),
+    DOCUMENT_NOT_FOUND("Document not found."),
+    NOTE_NOT_FOUND("Note not found."),
+    TYPE_CANNOT_BE_EMPTY("Type cannot be empty.");
     private final String description;
 
     ExceptionCode(String description) {

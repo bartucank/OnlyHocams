@@ -1,10 +1,12 @@
 package com.bartu.onlyhocams.service.impl;
 
 
+import com.bartu.onlyhocams.api.request.NoteRequest;
 import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
+import com.bartu.onlyhocams.dto.NoteDTO;
 import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
 import com.bartu.onlyhocams.entity.*;
@@ -41,19 +43,19 @@ public class OHServicesImpl implements OHServices {
     private LikeLogRepository likeLogRepository;
     private NoteRepository noteRepository;
     private PostRepository postRepository;
-    private ReviewRepository repository;
+    private ReviewRepository reviewRepository;
     private UserRepository userRepository;
     private JwtProvider jwtProvider;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
 
-    public OHServicesImpl(CategoryRepository categoryRepository, DocumentRepository documentRepository, LikeLogRepository likeLogRepository, NoteRepository noteRepository, PostRepository postRepository, ReviewRepository repository, UserRepository userRepository, JwtProvider jwtProvider, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public OHServicesImpl(CategoryRepository categoryRepository, DocumentRepository documentRepository, LikeLogRepository likeLogRepository, NoteRepository noteRepository, PostRepository postRepository, ReviewRepository reviewRepository, UserRepository userRepository, JwtProvider jwtProvider, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.categoryRepository = categoryRepository;
         this.documentRepository = documentRepository;
         this.likeLogRepository = likeLogRepository;
         this.noteRepository = noteRepository;
         this.postRepository = postRepository;
-        this.repository = repository;
+        this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.jwtProvider = jwtProvider;
         this.passwordEncoder = passwordEncoder;
@@ -325,6 +327,100 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         return postDTOS;
     }
 
+    @Override
+    public StatusDTO shareNote(NoteRequest request) {
+        if(Objects.isNull(request)){
+            throw new OhException(ExceptionCode.INVALID_REQUEST);
+        }
+        if(Objects.isNull(request.getContent())){
+            throw new OhException(ExceptionCode.CONTENT_CANNOT_BE_EMPTY);
+        }
+        if(Objects.isNull(request.getTitle())){
+            throw new OhException(ExceptionCode.TITLE_CANNOT_BE_EMPTY);
+        }
+        if(Objects.isNull(request.getDocumentId())){
+            throw new OhException(ExceptionCode.DOCUMENT_NOT_FOUND);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+
+        Note note = new Note();
+        note.setContent(request.getContent());
+        note.setUser(jwtUser);
+        note.setTitle(request.getTitle());
+        note.setPublishDate(LocalDateTime.now());
+        note = noteRepository.save(note);
+        documentRepository.linkDocumentToNote(note.getId(),request.getDocumentId());
+
+
+        return  StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
+
+    @Override
+    public StatusDTO deleteNote(Long id) {
+        if(Objects.isNull(id)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+        Note note = noteRepository.getById(id);
+        if(Objects.isNull(note)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if(!jwtUser.getId().equals(note.getUser().getId()) && !jwtUser.getRole().equals(Role.ADMIN)){
+            throw new OhException(ExceptionCode.USER_UNAUTHORIZED);
+        }
+        reviewRepository.bulkDeleteByNoteIds(List.of(id));
+        documentRepository.bulkDeleteByNoteIds(List.of(id));
+        noteRepository.deleteById(id);
+
+        return StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
+
+    @Override
+    public List<NoteDTO> getNotes(int limit, int offset) {
+        List<Note> notes = noteRepository.getNotes(limit,offset);
+        List<NoteDTO> noteDTOS = new ArrayList<>();
+        for (Note note : notes) {
+            NoteDTO noteDTO = note.toDTO();
+            List<Review> reviews = reviewRepository.getByNoteId(note.getId());
+            for (Review review : reviews) {
+                noteDTO.getReviews().add(review.toDTO());
+            }
+            Document document = documentRepository.getDocumentByNoteId(note.getId());
+            noteDTO.setDocument(document.toDTO());
+            noteDTOS.add(noteDTO);
+        }
+        return noteDTOS;
+    }
+
+    @Override
+    public StatusDTO reviewNote(Long id, String content, Type type) {
+        if(Objects.isNull(id)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+        Note note = noteRepository.getById(id);
+        if(Objects.isNull(note)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+        if(Objects.isNull(content)){
+            throw new OhException(ExceptionCode.CONTENT_CANNOT_BE_EMPTY);
+        }
+        if(Objects.isNull(type)){
+            throw new OhException(ExceptionCode.TYPE_CANNOT_BE_EMPTY);
+        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        Review review = new Review();
+        review.setContent(content);
+        review.setType(type);
+        review.setUser(jwtUser);
+        review.setNote(note);
+        review = reviewRepository.save(review);
+        return StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
 
 
 }

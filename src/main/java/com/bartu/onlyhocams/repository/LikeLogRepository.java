@@ -42,4 +42,5 @@ public interface LikeLogRepository extends JpaRepository<LikeLog,Long> {
 
     @Query("select l from LikeLog l where l.post.id=:id")
     List<LikeLog> getLikes(@Param("id") Long id);
+
 }

@@ -1,5 +1,6 @@
 package com.bartu.onlyhocams.entity;
 
+import com.bartu.onlyhocams.dto.ReviewDTO;
 import com.bartu.onlyhocams.entity.enums.Role;
 import com.bartu.onlyhocams.entity.enums.Type;
 import lombok.Data;
@@ -33,4 +34,14 @@ public class Review {
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "FK_REVIEW_NOTE"))
     private Note note;
+
+    public ReviewDTO toDTO(){
+        ReviewDTO reviewDTO = new ReviewDTO();
+        reviewDTO.setId(this.id);
+        reviewDTO.setContent(this.content);
+        reviewDTO.setType(this.type);
+        reviewDTO.setUser(this.user.toDTO());
+        reviewDTO.setNoteId(this.note.getId());
+        return reviewDTO;
+    }
 }

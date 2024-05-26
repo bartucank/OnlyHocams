@@ -1,12 +1,15 @@
 package com.bartu.onlyhocams.service;
 
 
+import com.bartu.onlyhocams.api.request.NoteRequest;
 import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
+import com.bartu.onlyhocams.dto.NoteDTO;
 import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
+import com.bartu.onlyhocams.entity.enums.Type;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -41,4 +44,12 @@ public interface OHServices {
 
 
     List<PostDTO> getPostsByCategoryId(int lim, int off, Long categoryId);
+
+    StatusDTO shareNote(NoteRequest request);
+
+    StatusDTO deleteNote(Long id);
+
+    List<NoteDTO> getNotes(int limit, int offset);
+
+    StatusDTO reviewNote(Long id, String review, Type type);
 }

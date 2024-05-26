@@ -42,4 +42,12 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
 
     @Query("select d from Document d where d.post.id=:id")
     List<Document> getDocumentsByPostId(@Param("id") Long id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM document where note_id in :id ", nativeQuery = true)
+    void bulkDeleteByNoteIds(@Param("id")List<Long> id);
+
+    @Query("select d from Document d where d.note.id=:id")
+    Document getDocumentByNoteId(@Param("id") Long id);
 }
