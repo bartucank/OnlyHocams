@@ -73,8 +73,9 @@ public class UserController {
 
     @GetMapping("/post")
     public ResponseEntity<ApiResponse<List<PostDTO>>> getPosts(@RequestParam("limit")int limit, @RequestParam("offset")int offset,
-                                                               @RequestParam(value = "categoryId",required = true)Long categoryId){
-        return responseService.createResponse(service.getPostsByCategoryId(limit,offset,categoryId));
+                                                               @RequestParam(value = "categoryId",required = true)Long categoryId,
+                                                               @RequestParam(value = "key",required = false)String key){
+        return responseService.createResponse(service.getPostsByCategoryId(limit,offset,categoryId,key));
     }
 
     @PostMapping(value="/document",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -107,5 +108,15 @@ public class UserController {
     @GetMapping("/category")
     public ResponseEntity<ApiResponse<List<CategoryDTO>>> getCategories(){
         return responseService.createResponse(service.getCategories());
+    }
+
+    @PostMapping("/note/purchase")
+    public ResponseEntity<ApiResponse<StatusDTO>> purchaseNote(@RequestParam("id")Long id){
+        return responseService.createResponse(service.purchaseNote(id));
+    }
+
+    @GetMapping("/note/detail")
+    public ResponseEntity<ApiResponse<NoteDTO>> getNoteFullDetail(@RequestParam("id")Long id){
+        return responseService.createResponse(service.getNoteFullDetail(id));
     }
 }

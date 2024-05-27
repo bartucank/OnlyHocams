@@ -44,7 +44,7 @@ public interface OHServices {
     StatusDTO uploadDocument(MultipartFile file) throws IOException;
 
 
-    List<PostDTO> getPostsByCategoryId(int lim, int off, Long categoryId);
+    List<PostDTO> getPostsByCategoryId(int lim, int off, Long categoryId,String keyword);
 
     StatusDTO shareNote(NoteRequest request);
 
@@ -52,7 +52,11 @@ public interface OHServices {
 
     List<NoteDTO> getNotes(int limit, int offset);
 
+    NoteDTO getNoteFullDetail(Long id);
+
     StatusDTO reviewNote(Long id, String review, Type type);
 
     List<CategoryDTO> getCategories();
+
+    StatusDTO purchaseNote(Long id);
 }

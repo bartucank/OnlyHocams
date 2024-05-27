@@ -50,8 +50,9 @@ public class OHServicesImpl implements OHServices {
     private JwtProvider jwtProvider;
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
+    private NotePurhcaseHistoryRepository notePurhcaseHistoryRepository;
 
-    public OHServicesImpl(CategoryRepository categoryRepository, DocumentRepository documentRepository, LikeLogRepository likeLogRepository, NoteRepository noteRepository, PostRepository postRepository, ReviewRepository reviewRepository, UserRepository userRepository, JwtProvider jwtProvider, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public OHServicesImpl(CategoryRepository categoryRepository, DocumentRepository documentRepository, LikeLogRepository likeLogRepository, NoteRepository noteRepository, PostRepository postRepository, ReviewRepository reviewRepository, UserRepository userRepository, JwtProvider jwtProvider, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, NotePurhcaseHistoryRepository notePurhcaseHistoryRepository) {
         this.categoryRepository = categoryRepository;
         this.documentRepository = documentRepository;
         this.likeLogRepository = likeLogRepository;
@@ -62,6 +63,7 @@ public class OHServicesImpl implements OHServices {
         this.jwtProvider = jwtProvider;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.notePurhcaseHistoryRepository = notePurhcaseHistoryRepository;
     }
 
     @Override
@@ -309,8 +311,14 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
     }
 
     @Override
-    public List<PostDTO> getPostsByCategoryId(int lim, int off,Long categoryId){
-        List<Post> posts =  postRepository.getPosts(lim,off,categoryId);
+    public List<PostDTO> getPostsByCategoryId(int lim, int off,Long categoryId,String keyword){
+        List<Post> posts = new ArrayList<>();
+        if(Objects.nonNull(keyword) && !keyword.isEmpty()){
+            keyword = "%"+keyword.toLowerCase()+"%";
+            posts =  postRepository.getPostsByKeyword(lim,off,categoryId,keyword);
+        }else{
+            posts =  postRepository.getPosts(lim,off,categoryId);
+        }
         List<PostDTO> postDTOS = new ArrayList<>();
         for (Post post : posts) {
             PostDTO postDTO = post.toDTO();
@@ -396,17 +404,39 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         List<NoteDTO> noteDTOS = new ArrayList<>();
         for (Note note : notes) {
             NoteDTO noteDTO = note.toDTO();
-            List<Review> reviews = reviewRepository.getByNoteId(note.getId());
-            for (Review review : reviews) {
-                noteDTO.getReviews().add(review.toDTO());
-            }
-            Document document = documentRepository.getDocumentByNoteId(note.getId());
-            noteDTO.setDocument(document.toDTO());
+//            List<Review> reviews = reviewRepository.getByNoteId(note.getId());
+//            for (Review review : reviews) {
+//                noteDTO.getReviews().add(review.toDTO());
+//            }
+//            Document document = documentRepository.getDocumentByNoteId(note.getId());
+//            noteDTO.setDocument(document.toDTO());
             noteDTOS.add(noteDTO);
         }
         return noteDTOS;
     }
 
+    @Override
+    public NoteDTO getNoteFullDetail(Long id){
+        Note note = noteRepository.getById(id);
+        NoteDTO noteDTO = null;
+        if(Objects.nonNull(note)){
+            noteDTO = note.toDTO();
+            List<Review> reviews = reviewRepository.getByNoteId(note.getId());
+            for (Review review : reviews) {
+                noteDTO.getReviews().add(review.toDTO());
+            }
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            User jwtUser = (User) auth.getPrincipal();
+            if(Objects.nonNull(notePurhcaseHistoryRepository.existsByNoteAndUser(id,jwtUser.getId()))){
+                noteDTO.setIsPurchased(true);
+                Document document = documentRepository.getDocumentByNoteId(note.getId());
+                noteDTO.setDocument(document.toDTO());
+            }else{
+                noteDTO.setIsPurchased(false);
+            }
+        }
+        return noteDTO;
+    }
     @Override
     public StatusDTO reviewNote(Long id, String content, Type type) {
         if(Objects.isNull(id)){
@@ -430,6 +460,29 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         review.setUser(jwtUser);
         review.setNote(note);
         review = reviewRepository.save(review);
+        return StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
+
+    @Override
+    public StatusDTO purchaseNote(Long id) {
+        if(Objects.isNull(id)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+        Note note = noteRepository.getById(id);
+        if(Objects.isNull(note)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        User user = userRepository.getById(jwtUser.getId());
+        if(user.getCredit().compareTo(BigDecimal.ONE)<0){
+            throw new OhException(ExceptionCode.INSUFFICIENT_BALANCE);
+        }
+        NotePurhcaseHistory notePurhcaseHistory = new NotePurhcaseHistory();
+        notePurhcaseHistory.setNote(note);
+        notePurhcaseHistory.setUser(user);
+        notePurhcaseHistoryRepository.save(notePurhcaseHistory);
+        userRepository.updateBalance(user.getId(),user.getCredit().subtract(BigDecimal.ONE));
         return StatusDTO.builder().statusCode("S").msg("Success").build();
     }
 

@@ -15,4 +15,5 @@ public class NoteDTO {
     private UserDTO user;
     private DocumentDTO document;
     private List<ReviewDTO> reviews;
+    private Boolean isPurchased;
 }

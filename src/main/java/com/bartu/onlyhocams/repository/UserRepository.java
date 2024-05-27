@@ -31,4 +31,10 @@ public interface UserRepository extends JpaRepository<User,Long> {
                     @Param("password") String password,
                     @Param("role") String role,
                     @Param("credit") BigDecimal credit);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE \"user\" SET credit = :finalPrice WHERE id = :id", nativeQuery = true)
+    void updateBalance(@Param("id") Long id,
+                       @Param("finalPrice") BigDecimal finalPrice);
 }
