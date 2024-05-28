@@ -596,4 +596,10 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         likeLogRepository.deleteById(id);
         return  StatusDTO.builder().statusCode("S").msg("Success").build();
     }
+
+    @Override
+    public List<UserDTO> getUsers(){
+        List<User> users = userRepository.findAllUsers();
+        return users.stream().map(User::toDTO).collect(Collectors.toList());
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
@@ -42,4 +43,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Transactional
     @Query(value = "DELETE FROM \"user\" where id=:id ", nativeQuery = true)
     void deleteById(@Param("id") Long id);
+    
+    @Query("select u from User u where u.role='USER' ")
+    List<User> findAllUsers();
 }

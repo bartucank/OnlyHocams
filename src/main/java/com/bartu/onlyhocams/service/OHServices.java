@@ -67,4 +67,6 @@ public interface OHServices {
     StatusDTO deleteReview(Long id);
 
     StatusDTO deleteLikeLog(Long id);
+
+    List<UserDTO> getUsers();
 }
