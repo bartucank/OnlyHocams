@@ -52,7 +52,7 @@ public interface OHServices {
 
     StatusDTO approveNote(Long id);
 
-    List<NoteDTO> getNotes(int limit, int offset,String keyword,Boolean waiting);
+    List<NoteDTO> getNotes(int limit, int offset,String keyword,Boolean waiting,Boolean owned);
 
     NoteDTO getNoteFullDetail(Long id);
 
@@ -61,4 +61,10 @@ public interface OHServices {
     List<CategoryDTO> getCategories();
 
     StatusDTO purchaseNote(Long id);
+
+    StatusDTO deleteUser(Long id);
+
+    StatusDTO deleteReview(Long id);
+
+    StatusDTO deleteLikeLog(Long id);
 }

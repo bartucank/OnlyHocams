@@ -97,9 +97,10 @@ public class UserController {
     public ResponseEntity<ApiResponse<List<NoteDTO>>> getNotes(@RequestParam("limit")int limit,
                                                                @RequestParam("offset")int offset,
                                                                @RequestParam(value = "key",required = false) String key,
-                                                               @RequestParam(value = "waiting",required = false) Boolean waiting
+                                                               @RequestParam(value = "waiting",required = false) Boolean waiting,
+                                                               @RequestParam(value = "owned",required = false) Boolean owned
     ) {
-        return responseService.createResponse(service.getNotes(limit,offset,key,waiting));
+        return responseService.createResponse(service.getNotes(limit,offset,key,waiting,owned));
     }
 
     @PostMapping("/note/review")

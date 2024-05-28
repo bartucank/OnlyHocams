@@ -20,7 +20,7 @@ public enum ExceptionCode {
     NOTE_NOT_FOUND("Note not found."),
     TYPE_CANNOT_BE_EMPTY("Type cannot be empty."), INSUFFICIENT_BALANCE("Insufficient balance."),
 
-    ;
+    REVIEW_NOT_FOUND("Review not found."),;
     private final String description;
 
     ExceptionCode(String description) {

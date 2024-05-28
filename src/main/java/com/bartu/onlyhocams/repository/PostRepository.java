@@ -43,4 +43,12 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     List<Post> getPosts(@Param("lim") int lim, @Param("off") int off, @Param("categoryId") Long categoryId);
     @Query(value = "select * from post p where  p.category_id=:categoryId and lower(p.content) like :key order by publish_date desc limit :lim offset :off", nativeQuery = true)
     List<Post> getPostsByKeyword(@Param("lim") int lim, @Param("off") int off, @Param("categoryId") Long categoryId,@Param("key")String key);
+
+    @Query("select p.id from Post p where  p.user.id=:userId")
+    List<Long> getPostsByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM post where user_id=:id ", nativeQuery = true)
+    void deletePostsByUserId(@Param("id") Long id);
 }

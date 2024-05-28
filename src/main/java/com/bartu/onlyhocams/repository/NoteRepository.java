@@ -31,4 +31,16 @@ public interface NoteRepository extends JpaRepository<Note,Long> {
     @Query(value = "select * from note n where status = 'WAITING_APPROVE' order by publish_date desc limit :lim offset :off", nativeQuery = true)
     List<Note> getWaitingNotes(@Param("lim") int lim,
                                @Param("off") int off);
+
+    @Query("select n.id from Note n where n.user.id=:id")
+    List<Long> getNotesByUserId(@Param("id") Long id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM note where user_id=:id ", nativeQuery = true)
+    void deleteNotesByUserId(@Param("id") Long id);
+    @Query(value = "select * from note n left join note_purhcase_history nph on nph.note_id =n.id  where nph.user_id =:userId order by publish_date desc limit :lim offset :off", nativeQuery = true)
+    List<Note> getOwnNotes(@Param("lim") int lim,
+                               @Param("off") int off,
+                           @Param("userId")Long userId);
 }

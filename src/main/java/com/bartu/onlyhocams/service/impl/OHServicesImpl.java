@@ -386,6 +386,8 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         return  StatusDTO.builder().statusCode("S").msg("Success").build();
     }
 
+
+
     @Override
     public StatusDTO deleteNote(Long id) {
         if(Objects.isNull(id)){
@@ -428,7 +430,7 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
     }
 
     @Override
-    public List<NoteDTO> getNotes(int limit, int offset,String keyword,Boolean waiting) {
+    public List<NoteDTO> getNotes(int limit, int offset,String keyword,Boolean waiting,Boolean owned) {
         List<Note> notes = new ArrayList<>();
         if(Objects.nonNull(keyword) && !keyword.isEmpty()){
             keyword = "%"+keyword.toLowerCase()+"%";
@@ -438,6 +440,9 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         }
         if(Objects.nonNull(waiting) && waiting){
             notes = noteRepository.getWaitingNotes(limit,offset);
+        }
+        if(Objects.nonNull(owned) && owned){
+            notes = noteRepository.getOwnNotes(limit,offset,((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
         }
         List<NoteDTO> noteDTOS = new ArrayList<>();
         for (Note note : notes) {
@@ -518,5 +523,67 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         return StatusDTO.builder().statusCode("S").msg("Success").build();
     }
 
+    @Override
+    public StatusDTO deleteUser(Long id){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if(!jwtUser.getRole().equals(Role.ADMIN)){
+            throw new OhException(ExceptionCode.USER_UNAUTHORIZED);
+        }
+        User user = userRepository.getById(id);
+        if(Objects.isNull(user)){
+            throw new OhException(ExceptionCode.USER_NOT_FOUND);
+        }
 
+        List<Long> postIds = postRepository.getPostsByUserId(id);
+        likeLogRepository.bulkDeleteByPostIds(postIds);
+        documentRepository.bulkDeleteByPostIds(postIds);
+        postRepository.deletePostsByUserId(id);
+
+        List<Long> noteIds = noteRepository.getNotesByUserId(id);
+        reviewRepository.bulkDeleteByNoteIds(noteIds);
+        documentRepository.bulkDeleteByNoteIds(noteIds);
+        noteRepository.deleteNotesByUserId(id);
+
+        userRepository.deleteById(id);
+        return StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
+
+    @Override
+    public StatusDTO deleteReview(Long id) {
+        if(Objects.isNull(id)){
+            throw new OhException(ExceptionCode.REVIEW_NOT_FOUND);
+        }
+        Review review = reviewRepository.getById(id);
+        if(Objects.isNull(review)){
+            throw new OhException(ExceptionCode.REVIEW_NOT_FOUND);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if(!jwtUser.getId().equals(review.getUser().getId()) && !jwtUser.getRole().equals(Role.ADMIN)){
+            throw new OhException(ExceptionCode.USER_UNAUTHORIZED);
+        }
+        reviewRepository.deleteById(id);
+        return  StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
+
+    @Override
+    public StatusDTO deleteLikeLog(Long id) {
+        if(Objects.isNull(id)){
+            throw new OhException(ExceptionCode.COMMENT_NOT_FOUND);
+        }
+        LikeLog likeLog = likeLogRepository.getById(id);
+        if(Objects.isNull(likeLog)){
+            throw new OhException(ExceptionCode.COMMENT_NOT_FOUND);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if(!jwtUser.getId().equals(likeLog.getUser().getId()) && !jwtUser.getRole().equals(Role.ADMIN)){
+            throw new OhException(ExceptionCode.USER_UNAUTHORIZED);
+        }
+        likeLogRepository.deleteById(id);
+        return  StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
 }

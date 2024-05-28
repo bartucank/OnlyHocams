@@ -21,4 +21,6 @@ public interface ReviewRepository extends JpaRepository<Review,Long> {
     @Transactional
     @Query(value = "DELETE FROM review where note.id=:id ", nativeQuery = true)
     void bulkDeleteByNoteIds(@Param("id")List<Long> id);
+
+
 }

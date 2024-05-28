@@ -37,4 +37,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query(value = "UPDATE \"user\" SET credit = :finalPrice WHERE id = :id", nativeQuery = true)
     void updateBalance(@Param("id") Long id,
                        @Param("finalPrice") BigDecimal finalPrice);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM \"user\" where id=:id ", nativeQuery = true)
+    void deleteById(@Param("id") Long id);
 }
