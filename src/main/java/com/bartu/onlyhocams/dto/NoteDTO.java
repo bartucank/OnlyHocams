@@ -1,5 +1,6 @@
 package com.bartu.onlyhocams.dto;
 
+import com.bartu.onlyhocams.entity.enums.Status;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,4 +17,5 @@ public class NoteDTO {
     private DocumentDTO document;
     private List<ReviewDTO> reviews;
     private Boolean isPurchased;
+    private Status status;
 }

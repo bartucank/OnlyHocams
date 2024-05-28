@@ -18,4 +18,6 @@ public class PostDTO {
     private List<DocumentDTO> documents;
     private List<CommentDTO> comments;
     private List<LikeLogDTO> actions;
+    private Boolean isLiked;
+    private Boolean isDisliked;
 }

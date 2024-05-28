@@ -12,6 +12,7 @@ import com.bartu.onlyhocams.dto.PostDTO;
 import com.bartu.onlyhocams.dto.UserDTO;
 import com.bartu.onlyhocams.entity.*;
 import com.bartu.onlyhocams.entity.enums.Role;
+import com.bartu.onlyhocams.entity.enums.Status;
 import com.bartu.onlyhocams.entity.enums.Type;
 import com.bartu.onlyhocams.exception.ExceptionCode;
 import com.bartu.onlyhocams.exception.OhException;
@@ -328,6 +329,14 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
                     postDTO.getComments().add(action.toCommentDTO());
                 }else{
                     postDTO.getActions().add(action.toActionDTO());
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    User jwtUser = (User) auth.getPrincipal();
+                    if(action.getUser().getId().equals(jwtUser.getId()) && action.getType().equals(Type.LIKE)){
+                        postDTO.setIsLiked(true);
+                    }
+                    if(action.getUser().getId().equals(jwtUser.getId()) && action.getType().equals(Type.DISLIKE)) {
+                        postDTO.setIsDisliked(true);
+                    }
                 }
             }
             List<Document> documents = documentRepository.getDocumentsByPostId(post.getId());
@@ -369,6 +378,7 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         note.setUser(jwtUser);
         note.setTitle(request.getTitle());
         note.setPublishDate(LocalDateTime.now());
+        note.setStatus(Status.WAITING_APPROVE);
         note = noteRepository.save(note);
         documentRepository.linkDocumentToNote(note.getId(),request.getDocumentId());
 
@@ -399,17 +409,39 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
     }
 
     @Override
-    public List<NoteDTO> getNotes(int limit, int offset) {
-        List<Note> notes = noteRepository.getNotes(limit,offset);
+    public StatusDTO approveNote(Long id){
+        if(Objects.isNull(id)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+        Note note = noteRepository.getById(id);
+        if(Objects.isNull(note)){
+            throw new OhException(ExceptionCode.NOTE_NOT_FOUND);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
+        if(!jwtUser.getRole().equals(Role.ADMIN)){
+            throw new OhException(ExceptionCode.USER_UNAUTHORIZED);
+        }
+        noteRepository.approveNoteById(id);
+        return StatusDTO.builder().statusCode("S").msg("Success").build();
+    }
+
+    @Override
+    public List<NoteDTO> getNotes(int limit, int offset,String keyword,Boolean waiting) {
+        List<Note> notes = new ArrayList<>();
+        if(Objects.nonNull(keyword) && !keyword.isEmpty()){
+            keyword = "%"+keyword.toLowerCase()+"%";
+            notes =  noteRepository.getNotesByKeyword(limit,offset,keyword);
+        }else{
+            notes =  noteRepository.getNotes(limit,offset);
+        }
+        if(Objects.nonNull(waiting) && waiting){
+            notes = noteRepository.getWaitingNotes(limit,offset);
+        }
         List<NoteDTO> noteDTOS = new ArrayList<>();
         for (Note note : notes) {
             NoteDTO noteDTO = note.toDTO();
-//            List<Review> reviews = reviewRepository.getByNoteId(note.getId());
-//            for (Review review : reviews) {
-//                noteDTO.getReviews().add(review.toDTO());
-//            }
-//            Document document = documentRepository.getDocumentByNoteId(note.getId());
-//            noteDTO.setDocument(document.toDTO());
             noteDTOS.add(noteDTO);
         }
         return noteDTOS;
@@ -427,7 +459,7 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
             }
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             User jwtUser = (User) auth.getPrincipal();
-            if(Objects.nonNull(notePurhcaseHistoryRepository.existsByNoteAndUser(id,jwtUser.getId()))){
+            if(Objects.nonNull(notePurhcaseHistoryRepository.existsByNoteAndUser(id,jwtUser.getId())) || jwtUser.getRole().equals(Role.ADMIN)){
                 noteDTO.setIsPurchased(true);
                 Document document = documentRepository.getDocumentByNoteId(note.getId());
                 noteDTO.setDocument(document.toDTO());

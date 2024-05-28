@@ -53,6 +53,7 @@ public class Note {
         noteDTO.setFormattedDate(this.publishDate.format(formatter));
         noteDTO.setReviews(new ArrayList<>());
         noteDTO.setDocument(new DocumentDTO());
+        noteDTO.setStatus(getStatus());
         return noteDTO;
     }
 
