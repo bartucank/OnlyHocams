@@ -48,6 +48,7 @@ public class Note {
         NoteDTO noteDTO = new NoteDTO();
         noteDTO.setId(this.id);
         noteDTO.setTitle(this.title);
+        noteDTO.setContent(this.content);
         noteDTO.setUser(this.user.toDTO());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
         noteDTO.setFormattedDate(this.publishDate.format(formatter));

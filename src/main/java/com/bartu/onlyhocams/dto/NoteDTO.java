@@ -11,6 +11,7 @@ public class NoteDTO {
     private Long id;
 
     private String title;
+    private String content;
     private LocalDateTime publishDate;
     private String formattedDate;
     private UserDTO user;

@@ -23,4 +23,6 @@ public interface ReviewRepository extends JpaRepository<Review,Long> {
     void bulkDeleteByNoteIds(@Param("id")List<Long> id);
 
 
+    @Query("select r from Review r where r.note.id=:id and r.user.id=:userid")
+    Review getByNoteIdAndUserId(@Param("id") Long id, @Param("userid")Long userid);
 }

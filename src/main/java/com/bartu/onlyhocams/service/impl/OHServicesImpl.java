@@ -445,8 +445,15 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
             notes = noteRepository.getOwnNotes(limit,offset,((User)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId());
         }
         List<NoteDTO> noteDTOS = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
         for (Note note : notes) {
             NoteDTO noteDTO = note.toDTO();
+            if(Objects.nonNull(notePurhcaseHistoryRepository.existsByNoteAndUser(note.getId(),jwtUser.getId())) || jwtUser.getRole().equals(Role.ADMIN)) {
+                noteDTO.setIsPurchased(true);
+            }else{
+                noteDTO.setIsPurchased(false);
+            }
             noteDTOS.add(noteDTO);
         }
         return noteDTOS;
@@ -491,7 +498,10 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         }
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User jwtUser = (User) auth.getPrincipal();
-        Review review = new Review();
+        Review review = reviewRepository.getByNoteIdAndUserId(id,jwtUser.getId());
+        if(Objects.isNull(review)){
+            review = new Review();
+        }
         review.setContent(content);
         review.setType(type);
         review.setUser(jwtUser);
