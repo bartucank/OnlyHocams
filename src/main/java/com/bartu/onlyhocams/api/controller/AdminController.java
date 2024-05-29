@@ -45,5 +45,9 @@ public class AdminController {
         return responseService.createResponse(service.getUsers());
     }
 
+    @PostMapping("/note")
+    public ResponseEntity<ApiResponse<StatusDTO>> approveNote(@RequestParam("id") Long id){
+        return responseService.createResponse(service.approveNote(id));
+    }
 
 }
