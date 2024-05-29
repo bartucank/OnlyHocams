@@ -10,4 +10,5 @@ public class ReviewDTO {
     private UserDTO user;
     private Long noteId;
     private Type type;
+    private Boolean canDelete;
 }

@@ -107,6 +107,10 @@ public class UserController {
     public ResponseEntity<ApiResponse<StatusDTO>> reviewNote(@RequestParam("id")Long id, @RequestParam("content")String content, @RequestParam("type")Type type){
         return responseService.createResponse(service.reviewNote(id,content,type));
     }
+    @DeleteMapping("/note/review")
+    public ResponseEntity<ApiResponse<StatusDTO>> reviewNote(@RequestParam("id")Long id){
+        return responseService.createResponse(service.deleteReview(id));
+    }
 
 
 

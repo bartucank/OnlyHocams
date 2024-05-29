@@ -6,10 +6,7 @@ import com.bartu.onlyhocams.api.request.PostRequest;
 import com.bartu.onlyhocams.api.request.UserRequest;
 import com.bartu.onlyhocams.api.response.JwtResponse;
 import com.bartu.onlyhocams.api.response.StatusDTO;
-import com.bartu.onlyhocams.dto.CategoryDTO;
-import com.bartu.onlyhocams.dto.NoteDTO;
-import com.bartu.onlyhocams.dto.PostDTO;
-import com.bartu.onlyhocams.dto.UserDTO;
+import com.bartu.onlyhocams.dto.*;
 import com.bartu.onlyhocams.entity.*;
 import com.bartu.onlyhocams.entity.enums.Role;
 import com.bartu.onlyhocams.entity.enums.Status;
@@ -27,6 +24,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
@@ -34,6 +32,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -449,7 +448,7 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         User jwtUser = (User) auth.getPrincipal();
         for (Note note : notes) {
             NoteDTO noteDTO = note.toDTO();
-            if(Objects.nonNull(notePurhcaseHistoryRepository.existsByNoteAndUser(note.getId(),jwtUser.getId())) || jwtUser.getRole().equals(Role.ADMIN)) {
+            if(!CollectionUtils.isEmpty(notePurhcaseHistoryRepository.existsByNoteAndUser(note.getId(),jwtUser.getId())) || jwtUser.getRole().equals(Role.ADMIN)) {
                 noteDTO.setIsPurchased(true);
             }else{
                 noteDTO.setIsPurchased(false);
@@ -463,15 +462,20 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
     public NoteDTO getNoteFullDetail(Long id){
         Note note = noteRepository.getById(id);
         NoteDTO noteDTO = null;
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        User jwtUser = (User) auth.getPrincipal();
         if(Objects.nonNull(note)){
             noteDTO = note.toDTO();
             List<Review> reviews = reviewRepository.getByNoteId(note.getId());
             for (Review review : reviews) {
-                noteDTO.getReviews().add(review.toDTO());
+                ReviewDTO reviewDTO = review.toDTO();
+                if(review.getUser().getId().equals(jwtUser.getId()) || jwtUser.getRole().equals(Role.ADMIN)){
+                    reviewDTO.setCanDelete(true);
+                }
+                noteDTO.getReviews().add(reviewDTO);
             }
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            User jwtUser = (User) auth.getPrincipal();
-            if(Objects.nonNull(notePurhcaseHistoryRepository.existsByNoteAndUser(id,jwtUser.getId())) || jwtUser.getRole().equals(Role.ADMIN)){
+            if(!CollectionUtils.isEmpty(notePurhcaseHistoryRepository.existsByNoteAndUser(id,jwtUser.getId())) || jwtUser.getRole().equals(Role.ADMIN)){
                 noteDTO.setIsPurchased(true);
                 Document document = documentRepository.getDocumentByNoteId(note.getId());
                 noteDTO.setDocument(document.toDTO());

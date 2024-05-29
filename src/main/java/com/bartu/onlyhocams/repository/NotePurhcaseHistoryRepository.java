@@ -13,6 +13,6 @@ import java.util.List;
 public interface NotePurhcaseHistoryRepository extends JpaRepository<NotePurhcaseHistory,Long> {
 
     @Query("select n from NotePurhcaseHistory n where n.user.id=:userId and n.note.id=:noteId")
-    NotePurhcaseHistory existsByNoteAndUser(@Param("noteId") Long noteId,
+    List<NotePurhcaseHistory> existsByNoteAndUser(@Param("noteId") Long noteId,
                                 @Param("userId") Long userId);
 }
