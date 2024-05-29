@@ -43,4 +43,9 @@ public interface NoteRepository extends JpaRepository<Note,Long> {
     List<Note> getOwnNotes(@Param("lim") int lim,
                                @Param("off") int off,
                            @Param("userId")Long userId);
+
+    @Modifying
+    @Transactional
+    @Query(value = "DELETE FROM note where id=:id ", nativeQuery = true)
+    void deleteById(@Param("id")Long id);
 }

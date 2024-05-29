@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 @Data
 @Entity
+@Table(name = "note")
 public class Note {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -45,8 +45,8 @@ public interface DocumentRepository extends JpaRepository<Document,Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "DELETE FROM document where note_id in :id ", nativeQuery = true)
-    void bulkDeleteByNoteIds(@Param("id")List<Long> id);
+    @Query(value = "DELETE FROM document WHERE note_id IN (:id)", nativeQuery = true)
+    void bulkDeleteByNoteIds(@Param("id") List<Long> id);
 
     @Query("select d from Document d where d.note.id=:id")
     Document getDocumentByNoteId(@Param("id") Long id);
