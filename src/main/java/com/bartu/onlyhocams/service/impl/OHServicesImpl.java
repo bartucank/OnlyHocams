@@ -534,6 +534,7 @@ return StatusDTO.builder().statusCode("S").msg("Success").additionalInformation(
         notePurhcaseHistory.setUser(user);
         notePurhcaseHistoryRepository.save(notePurhcaseHistory);
         userRepository.updateBalance(user.getId(),user.getCredit().subtract(BigDecimal.ONE));
+        userRepository.updateBalance(note.getUser().getId(),note.getUser().getCredit().add(BigDecimal.ONE));
         return StatusDTO.builder().statusCode("S").msg("Success").build();
     }
 

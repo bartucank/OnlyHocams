@@ -24,7 +24,7 @@ public interface LikeLogRepository extends JpaRepository<LikeLog,Long> {
     @Query(value = "DELETE FROM like_log where id=:id ", nativeQuery = true)
     void deleteById(@Param("id")Long id);
 
-    @Query("select l from LikeLog l where l.user.id=:user and l.post.id=:post ")
+    @Query("select l from LikeLog l where l.user.id=:user and l.post.id=:post and l.type is not null and l.content is null ")
     LikeLog getLikeLogByPostAndUser(@Param("user")Long user,
                                            @Param("post")Long post);
     @Modifying
